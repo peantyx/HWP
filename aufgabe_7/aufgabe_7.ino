@@ -1,0 +1,120 @@
+#include <LiquidCrystal.h>
+
+// LCD Connection
+#define R_S 8
+#define E   9
+#define DB4 10
+#define DB5 11
+#define DB6 12
+#define DB7 13
+// LCD Defines
+#define NUM_CHAR 20
+#define NUM_LINES 4
+// Define the LCD screen
+LiquidCrystal lcd(R_S, E, DB4, DB5, DB6, DB7);
+//LED & BUTTON Connection
+#define LED_1 2
+#define LED_2 3
+#define LED_3 4
+#define LED_4 5
+#define LED_5 6
+#define LED_6 7
+#define BUTTON A0
+
+#define REFERENCE_VOLTAGE 3.3
+
+int lastState = LOW;
+int currentState;
+int pressed;
+
+const int lst[6] = { 2, 3, 4, 5, 6, 7 };
+const String lst_color[6] = {"gruen", "gruen", "gelb ", "gelb ", "rot  ", "rot  "};
+byte button_counter = 0;
+String current_color;
+
+//Timervariablen für Button-Press
+
+float frequency ; 
+float starting_time;
+int duration;
+bool button_state;
+bool led_state = LOW;
+bool current_state = HIGH;
+
+
+
+
+void setup() {
+  for (int i = 2; i < 8; i++){
+    pinMode(i, OUTPUT);
+    digitalWrite(i, LOW);
+  }
+  pinMode(BUTTON, INPUT);
+  // LCD has 4 lines with 20 chars
+  lcd.begin(NUM_CHAR, NUM_LINES);
+}
+
+
+void loop() {
+  //hier ist das Map von dem Potientometerwerten auf die gewünschte Frequenz... Bin mir aber auch nicht ganz sicher
+  frequency = map(analogRead(A1), 0, 1023, 10, 500);
+  // It has to be the sime time on and off so divide by 2
+  duration = 60 /frequency / 2;
+  
+  // Read both digital and analog value of current Button
+  //button_state = digitalRead(BUTTON);
+  button_state = analogRead(BUTTON);
+
+  // Switch LED Color with Button S1
+  if (button_state <= 50 && button_state > 0){
+    if (current_state == HIGH){
+      starting_time = millis();
+      //Now we only switch colors, if S1 was pressed, specifically.
+      digitalWrite(lst[button_counter], LOW);
+      button_counter++;
+      button_counter %= 6;
+      digitalWrite(lst[button_counter], HIGH);
+      led_state = true;
+      // Then flash our chosen one
+      //digitalWrite(lst[button_counter], HIGH);
+      current_color = lst_color[button_counter];
+    }
+  }
+  else{
+    current_state = LOW;
+  }
+  // Potentially switch off the current LED
+  float current_duration = millis()-starting_time;
+  if (current_duration > duration){
+    led_state = !led_state;
+    digitalWrite(lst[button_counter], led_state);
+    starting_time = millis();
+  }
+
+  // Print everything on LCD
+  lcd.setCursor(0, 0);
+  lcd.print("ANALOG 0: ");
+  float button_value = analogRead(BUTTON);
+  float voltage = button_value*REFERENCE_VOLTAGE/1023.00;
+  lcd.print(voltage);
+  lcd.print("V");
+
+  lcd.setCursor(0,1);
+  lcd.print("Button: ");
+
+  if (button_value <= 50 && button_value >= 0){lcd.print("S1  ");}
+  if (button_value <= 1023 && button_value >= 1000){lcd.print("S-  ");}
+  if (button_value <= 250 && button_value >= 230){lcd.print("S2  ");}
+  if (button_value <= 500 && button_value >= 310){lcd.print("S3  ");}
+  if (button_value <= 700 && button_value >= 510){lcd.print("S4  ");}
+  if (button_value <= 900 && button_value >= 710){lcd.print("S5  ");}
+
+  lcd.setCursor(0,2);
+  lcd.print(current_color);
+
+  lcd.setCursor(0,3);
+  lcd.print(duration);
+
+  lcd.setCursor(0,4);
+  lcd.print(current_color);
+}

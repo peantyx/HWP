@@ -1,2 +1,2 @@
 # HWP
-This is our shared Hardware Practictum Project
+This is our shared Hardware Practicum Project
