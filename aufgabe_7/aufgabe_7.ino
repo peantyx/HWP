@@ -14,12 +14,7 @@
 LiquidCrystal lcd(R_S, E, DB4, DB5, DB6, DB7);
 //LED & BUTTON Connection
 #define BUTTON A0
-
 #define REFERENCE_VOLTAGE 3.3
-
-int lastState = LOW;
-int currentState;
-int pressed;
 
 const int lst[6] = { 2, 3, 4, 5, 6, 7 };
 const String lst_color[6] = {"gruen", "gruen", "gelb ", "gelb ", "rot  ", "rot  "};
@@ -34,8 +29,6 @@ int duration;
 bool button_state;
 bool led_state = LOW;
 bool current_state = HIGH;
-
-
 
 
 void setup() {
@@ -70,7 +63,7 @@ void loop() {
       button_counter++;
       button_counter %= 6;
       led_state = true;
-      digitalWrite(lst[button_counter], led_state);
+      digitalWrite(lst[button_counter], HIGH);
       current_color = lst_color[button_counter];
     }
   }
