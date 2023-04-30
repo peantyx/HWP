@@ -13,12 +13,6 @@
 // Define the LCD screen
 LiquidCrystal lcd(R_S, E, DB4, DB5, DB6, DB7);
 //LED & BUTTON Connection
-#define LED_1 2
-#define LED_2 3
-#define LED_3 4
-#define LED_4 5
-#define LED_5 6
-#define LED_6 7
 #define BUTTON A0
 
 #define REFERENCE_VOLTAGE 3.3
@@ -33,9 +27,9 @@ byte button_counter = 0;
 String current_color;
 
 //Timervariablen für Button-Press
-
-float frequency ; 
+float frequency; 
 float starting_time;
+float current_duration;
 int duration;
 bool button_state;
 bool led_state = LOW;
@@ -67,16 +61,16 @@ void loop() {
 
   // Switch LED Color with Button S1
   if (button_state <= 50 && button_state > 0){
+    // Check, if we already pushed
     if (current_state == HIGH){
       starting_time = millis();
-      //Now we only switch colors, if S1 was pressed, specifically.
+      // Stop old LED
       digitalWrite(lst[button_counter], LOW);
+      // Choose new LED
       button_counter++;
       button_counter %= 6;
-      digitalWrite(lst[button_counter], HIGH);
       led_state = true;
-      // Then flash our chosen one
-      //digitalWrite(lst[button_counter], HIGH);
+      digitalWrite(lst[button_counter], led_state);
       current_color = lst_color[button_counter];
     }
   }
@@ -84,7 +78,7 @@ void loop() {
     current_state = LOW;
   }
   // Potentially switch off the current LED
-  float current_duration = millis()-starting_time;
+  current_duration = millis()-starting_time;
   if (current_duration > duration){
     led_state = !led_state;
     digitalWrite(lst[button_counter], led_state);
@@ -103,18 +97,16 @@ void loop() {
   lcd.print("Button: ");
 
   if (button_value <= 50 && button_value >= 0){lcd.print("S1  ");}
-  if (button_value <= 1023 && button_value >= 1000){lcd.print("S-  ");}
-  if (button_value <= 250 && button_value >= 230){lcd.print("S2  ");}
-  if (button_value <= 500 && button_value >= 310){lcd.print("S3  ");}
-  if (button_value <= 700 && button_value >= 510){lcd.print("S4  ");}
-  if (button_value <= 900 && button_value >= 710){lcd.print("S5  ");}
+  else if (button_value <= 1023 && button_value >= 1000){lcd.print("S-  ");}
+  else if (button_value <= 250 && button_value >= 230){lcd.print("S2  ");}
+  else if (button_value <= 500 && button_value >= 310){lcd.print("S3  ");}
+  else if (button_value <= 700 && button_value >= 510){lcd.print("S4  ");}
+  else if (button_value <= 900 && button_value >= 710){lcd.print("S5  ");}
 
   lcd.setCursor(0,2);
-  lcd.print(current_color);
-
-  lcd.setCursor(0,3);
   lcd.print(duration);
 
-  lcd.setCursor(0,4);
+  lcd.setCursor(0,3);
   lcd.print(current_color);
+
 }
